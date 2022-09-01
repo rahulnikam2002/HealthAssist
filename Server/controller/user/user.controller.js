@@ -121,7 +121,7 @@ exports.sendOTPMail = async (req, res) => {
           <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">HealthAssist</a>
         </div>
         <p style="font-size:1.1em">Hi,</p>
-        <p>Below is your 4 digit verification code for verifing yuur identity, Make sure you do not share this OTP with anyone.</p>
+        <p>Below is your 4 digit verification code for verifing your identity, Make sure you do not share this OTP with anyone.</p>
         <h2 style="background: #00466a;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${OTP}</h2>
         <p style="font-size:0.9em;">Regards,<br />HealthAssist</p>
         <hr style="border:none;border-top:1px solid #eee" />
@@ -134,12 +134,48 @@ exports.sendOTPMail = async (req, res) => {
     </div>`,
     };
 
-    OTPModel = await new userOTPModel({
-      userEmail: email,
-      userOTP: await bcrypt.hash(stringOTP, 10),
+    const sendMail = transporter.sendMail(
+      emailTemplate,
+      async (err, emailSend) => {
+        if (err) {
+          res.status(500).send({
+            messgae: "Some error occurred while sending the mail",
+          });
+        } else {
+          OTPModel = await new userOTPModel({
+            userEmail: email,
+            userOTP: await bcrypt.hash(stringOTP, 10),
+          });
+          const saveUserOtp = await OTPModel.save();
+          res.send(saveUserOtp);
+        }
+      }
+    );
+  }
+};
+
+
+exports.verifyOTP = async (req, res) => {
+  const { userEmail, userOTP } = req.body;
+  const OTPModel = await userOTPModel.findOne({
+    userEmail: userEmail,
+  });
+  const isOTPValid = await bcrypt.compare(userOTP, OTPModel.userOTP);
+  if (isOTPValid) {
+    res.status(200).send({
+      isOTPValid,
+      messgae: "Valid OTP"
+    });
+    
+    const deleteOTPEntry = await userOTPModel.deleteOne({
+      userEmail: userEmail
     });
 
-    const saveUserOtp = await OTPModel.save();
-    res.send(saveUserOtp);
+  } else {
+    res.status(406).send({
+      isOTPValid,
+      messgae: "InValid OTP"
+
+    });
   }
 };

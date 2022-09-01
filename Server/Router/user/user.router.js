@@ -4,6 +4,6 @@ const controller = require("../../controller/user/user.controller.js");
 router.post("/register", controller.register);
 router.post("/login", controller.login);
 router.post("/send-otp", controller.sendOTPMail);
-
+router.post("/verify-otp", controller.verifyOTP);
 
 module.exports = router;
