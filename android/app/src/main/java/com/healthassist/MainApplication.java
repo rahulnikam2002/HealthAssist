@@ -17,6 +17,7 @@ import com.healthassist.newarchitecture.MainApplicationReactNativeHost;
 import expo.modules.ApplicationLifecycleDispatcher;
 import expo.modules.ReactNativeHostWrapper;
 
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 

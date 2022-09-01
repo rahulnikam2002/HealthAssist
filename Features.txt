@@ -1,0 +1,73 @@
+Appointment Confirmation Page => {
+    Confirmation Msg
+    Patient Name,
+    Clinic Name,
+    Date & Time
+}
+
+Onboarding Screen => {
+    Register Clinic,
+    Register User
+}
+
+Register Clinic => {
+    Clinic Name,
+    Clinic Reg no,
+    address
+    phone no
+    email
+    no of doctor
+    no of nurse
+    add doc field
+    add nurse field
+    total beds
+    OPD or IPD. 
+    images
+    appointments quota
+    password
+}
+
+Clinic Login => {
+    regno
+    password
+    or
+    login with email via opt
+    or
+    password less login
+}
+
+user registration => {
+    Name,
+    email,
+    phone,
+    photo,
+    address,
+    age,
+    Gender,
+    password,
+}
+
+
+
+Extra Features => {
+    BMI - Body Mass Index
+    Add Family
+}
+
+
+Technologies => {
+    Backend => {
+        1. NodeJS (Runtime env),
+        2. Express,
+        3. MongoDB
+        5. Bcrypt (Security)
+        .
+        .
+        .
+        .
+        .
+        .
+        .
+        
+    }
+}
