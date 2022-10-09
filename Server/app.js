@@ -15,7 +15,7 @@ mongoose
   .then(() => console.log("Database connected!"))
   .catch((err) =>
     console.log("Error while making connection with database!", err.message)
-  );
+);
 
 app.use("/user", userRouter)
 

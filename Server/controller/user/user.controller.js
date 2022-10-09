@@ -5,56 +5,81 @@ const jwt = require("jsonwebtoken");
 const nodeMailer = require("nodemailer");
 
 exports.register = async (req, res) => {
-  const user = await userModel.findOne({
-    userEmail: req.body.userEmail,
+  console.log("Entered Register");
+  const { userEmail, userOTP } = req.body;
+  console.log(userEmail, userOTP);
+  const OTPModel = await userOTPModel.find({
+    userEmail: userEmail,
   });
-
-  if (!user) {
-    const newUser = new userModel({
-      userName: req.body.userName,
+  
+  // console.log("OTP model ===> ", OTPModel[OTPModel.length - 1]);
+  const isOTPValid = await bcrypt.compare(userOTP, OTPModel[OTPModel.length - 1].userOTP);
+  console.log("is OTP valid ===>", isOTPValid);
+  if (isOTPValid) {
+    const user = await userModel.findOne({
       userEmail: req.body.userEmail,
-      userPassword: await bcrypt.hash(req.body.userPassword, 10),
     });
 
-    const saveUser = await newUser.save();
-
-    if (saveUser) {
-      const userToken = jwt.sign(
-        { userEmail: req.body.userEmail },
-        process.env.JWT_SEC,
-        { expiresIn: "1d" }
-      );
-      res.status(200).send({
-        isUserAdded: true,
-        userToken,
-        message: "User registered successfully!",
+    if (!user) {
+      const newUser = new userModel({
+        userName: req.body.userName,
+        userEmail: req.body.userEmail,
+        userPassword: await bcrypt.hash(req.body.userPassword, 10),
       });
+
+      const saveUser = await newUser.save();
+
+      if (saveUser) {
+        const userToken = jwt.sign(
+          { userEmail: req.body.userEmail },
+          process.env.JWT_SEC,
+          { expiresIn: "1d" }
+        );
+        res.status(200).send({
+          isUserAdded: true,
+          userToken,
+          isOTPValid,
+          message: "User registered successfully!",
+        });
+      } else {
+        res.status(502).send({
+          isUserAdded: false,
+          message: "Something went wrong while addind data to database",
+        });
+      }
     } else {
-      res.status(502).send({
-        isUserAdded: false,
-        message: "Something went wrong while addind data to database",
+      res.status(406).send({
+        isExistingUser: true,
+        message: "You already have an account, Try Sign In!",
       });
     }
+
+    const deleteOTPEntry = await userOTPModel.deleteOne({
+      userEmail: userEmail,
+    });
   } else {
     res.status(406).send({
-      isExistingUser: true,
-      message: "You already have an account, Try Sign In!",
+      isOTPValid,
+      messgae: "InValid OTP",
     });
   }
 };
 
 exports.login = async (req, res) => {
+  console.log("LOGIN => entered password processing")
   const user = await userModel.findOne({
     userEmail: req.body.userEmail,
   });
 
   if (user) {
+    console.log("LOGIN => user found")
     const isPasswordMatching = await bcrypt.compare(
       req.body.userPassword,
       user.userPassword
     );
 
     if (isPasswordMatching) {
+      console.log("LOGIN => password matched")
       const userToken = jwt.sign(
         { userEmail: req.body.userEmail },
         process.env.JWT_SEC,
@@ -66,12 +91,14 @@ exports.login = async (req, res) => {
         message: "User logged in successfully!",
       });
     } else {
+      console.log("LOGIN => something went round")
       res.status(502).send({
         isUserAdded: false,
         message: "Something went wrong while addind data to database",
       });
     }
   } else {
+    console.log("LOGIN => user not found")
     res.status(406).send({
       isExistingUser: false,
       message: "You dont have an account, Try Sign Up!",
@@ -91,15 +118,18 @@ const doUserExist = async (email) => {
 };
 
 exports.sendOTPMail = async (req, res) => {
+  console.log("Entered Send Mail");
   const email = req.body.userEmail;
   let OTPModel;
 
   if (await doUserExist(req.body.userEmail)) {
+    console.log("OTP => user already exist");
     res.status(406).send({
       message: "User already exist",
     });
   } else {
-    const OTP = Math.floor(1000 + Math.random() * 9000);
+    console.log("OTP => User didn't exist, Processing further");
+    const OTP = Math.floor(1000 + Math.random() * 9000);  
     const stringOTP = String(OTP);
 
     const transporter = nodeMailer.createTransport({
@@ -109,6 +139,7 @@ exports.sendOTPMail = async (req, res) => {
         pass: process.env.APP_PASSWORD,
       },
     });
+    console.log("OTP => user credentials added");
 
     const emailTemplate = {
       from: `"HealthAssist" <codewithrahulnikam@gmail.com>`,
@@ -137,45 +168,25 @@ exports.sendOTPMail = async (req, res) => {
     const sendMail = transporter.sendMail(
       emailTemplate,
       async (err, emailSend) => {
+        console.log("OTP => Sending email process started");
         if (err) {
+          console.log("OTP => Error occurred while sending email");
           res.status(500).send({
-            messgae: "Some error occurred while sending the mail",
+            messgae: "Some error occurred while sending the mail", err
           });
         } else {
+          console.log("OTP => no error, email send, adding data to database");
           OTPModel = await new userOTPModel({
             userEmail: email,
             userOTP: await bcrypt.hash(stringOTP, 10),
           });
           const saveUserOtp = await OTPModel.save();
-          res.send(saveUserOtp);
+          res.status(200).send({
+            messgae: "OTP send successfully",
+          });
+          console.log("OTP => Data added to database");
         }
       }
     );
-  }
-};
-
-
-exports.verifyOTP = async (req, res) => {
-  const { userEmail, userOTP } = req.body;
-  const OTPModel = await userOTPModel.findOne({
-    userEmail: userEmail,
-  });
-  const isOTPValid = await bcrypt.compare(userOTP, OTPModel.userOTP);
-  if (isOTPValid) {
-    res.status(200).send({
-      isOTPValid,
-      messgae: "Valid OTP"
-    });
-    
-    const deleteOTPEntry = await userOTPModel.deleteOne({
-      userEmail: userEmail
-    });
-
-  } else {
-    res.status(406).send({
-      isOTPValid,
-      messgae: "InValid OTP"
-
-    });
   }
 };
