@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import React from "react";
+import { useNavigation } from "@react-navigation/native";
 
 // Images
 import Cardiology from "../../assets/heart.png";
@@ -15,37 +16,37 @@ const categoriesData = [
   {
     name: "Cardiology",
     icon: Cardiology,
-    screen: "CardiologyFilter",
+    screen: "SingleCategoryScreen",
   },
   {
     name: "Dermatology",
     icon: Dermatology,
-    screen: "DermatologyFilter",
+    screen: "SingleCategoryScreen",
   },
   {
     name: "Neurology",
     icon: Neurology,
-    screen: "NeurologyFilter",
+    screen: "SingleCategoryScreen",
   },
   {
     name: "Dentist",
     icon: Dentist,
-    screen: "DentistFilter",
+    screen: "SingleCategoryScreen",
   },
   {
     name: "Allergist",
     icon: Allergist,
-    screen: "AllergistFilter",
+    screen: "SingleCategoryScreen",
   },
   {
     name: "Endocrinologist",
     icon: Endocrinologist,
-    screen: "EndocrinologistFilter",
+    screen: "SingleCategoryScreen",
   },
   {
     name: "Hematologists",
     icon: Hematologists,
-    screen: "HematologistsFilter",
+    screen: "SingleCategoryScreen",
   },
   {
     name: "Show More",
@@ -55,6 +56,7 @@ const categoriesData = [
 ];
 
 const Categories = () => {
+  const navigation = useNavigation();
   return (
     <View style={{ marginTop: 20 }}>
       <Text style={{ fontSize: 18 }}>Categories</Text>
@@ -79,6 +81,7 @@ const Categories = () => {
                 paddingVertical: 10,
                 paddingHorizontal: 10
               }}
+              onPress = {() => navigation.navigate(`${item.screen}`, {category: item.name})}
             >
               <Image source={item.icon} style={{ width: 40, height: 40 }} />
               <Text

@@ -11,9 +11,12 @@ exports.register = async (req, res) => {
   const OTPModel = await userOTPModel.find({
     userEmail: userEmail,
   });
-  
+
   // console.log("OTP model ===> ", OTPModel[OTPModel.length - 1]);
-  const isOTPValid = await bcrypt.compare(userOTP, OTPModel[OTPModel.length - 1].userOTP);
+  const isOTPValid = await bcrypt.compare(
+    userOTP,
+    OTPModel[OTPModel.length - 1].userOTP
+  );
   console.log("is OTP valid ===>", isOTPValid);
   if (isOTPValid) {
     const user = await userModel.findOne({
@@ -66,20 +69,20 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-  console.log("LOGIN => entered password processing")
+  console.log("LOGIN => entered password processing");
   const user = await userModel.findOne({
     userEmail: req.body.userEmail,
   });
 
   if (user) {
-    console.log("LOGIN => user found")
+    console.log("LOGIN => user found");
     const isPasswordMatching = await bcrypt.compare(
       req.body.userPassword,
       user.userPassword
     );
 
     if (isPasswordMatching) {
-      console.log("LOGIN => password matched")
+      console.log("LOGIN => password matched");
       const userToken = jwt.sign(
         { userEmail: req.body.userEmail },
         process.env.JWT_SEC,
@@ -91,14 +94,14 @@ exports.login = async (req, res) => {
         message: "User logged in successfully!",
       });
     } else {
-      console.log("LOGIN => something went round")
+      console.log("LOGIN => something went round");
       res.status(502).send({
         isUserAdded: false,
         message: "Something went wrong while addind data to database",
       });
     }
   } else {
-    console.log("LOGIN => user not found")
+    console.log("LOGIN => user not found");
     res.status(406).send({
       isExistingUser: false,
       message: "You dont have an account, Try Sign Up!",
@@ -129,7 +132,7 @@ exports.sendOTPMail = async (req, res) => {
     });
   } else {
     console.log("OTP => User didn't exist, Processing further");
-    const OTP = Math.floor(1000 + Math.random() * 9000);  
+    const OTP = Math.floor(1000 + Math.random() * 9000);
     const stringOTP = String(OTP);
 
     const transporter = nodeMailer.createTransport({
@@ -172,7 +175,8 @@ exports.sendOTPMail = async (req, res) => {
         if (err) {
           console.log("OTP => Error occurred while sending email");
           res.status(500).send({
-            messgae: "Some error occurred while sending the mail", err
+            messgae: "Some error occurred while sending the mail",
+            err,
           });
         } else {
           console.log("OTP => no error, email send, adding data to database");
@@ -189,4 +193,25 @@ exports.sendOTPMail = async (req, res) => {
       }
     );
   }
+};
+
+exports.userInfo = async (req, res) => {
+  const token = req.body.token;
+  console.log(token);
+  jwt.verify(token, process.env.JWT_SEC, async (err, decode) => {
+    if (err) {
+      console.log("JWT => Token error");
+    } else {
+      console.log(decode)
+      const email = decode.userEmail;
+      console.log(email);
+      const user = await userModel.findOne({
+        userEmail: email,
+      });
+      res.status(200).send({
+        userName: user.userName,
+        userEmail: user.userEmail,
+      })
+    }
+  });
 };

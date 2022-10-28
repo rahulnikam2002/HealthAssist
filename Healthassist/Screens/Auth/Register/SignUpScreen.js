@@ -19,6 +19,7 @@ const screenHeight = Dimensions.get("window").height;
 const AndroidNotchHeight = StatusBar.currentHeight;
 
 const SignUpScreen = () => {
+  //states
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

@@ -15,6 +15,7 @@ import SingleClinicListing from "./Screens/Listing/singleClinicListing";
 import SingleAppointmentHistory from "./Screens/AppointmentHistory/SingleAppointmentHistory";
 import { useIsFocused } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
+import SingleCategoryScreen from "./Screens/Categories/SingleCategoryScreen";
 
 const Stack = createStackNavigator();
 const horizontalAnimation = {
@@ -65,6 +66,7 @@ export default function App() {
         <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
         <Stack.Screen name="OTPVerification" component={OTPVerification} />
         <Stack.Screen name="BottomTab" component={BottomTab} />
+        <Stack.Screen name="SingleCategoryScreen" component={SingleCategoryScreen} />
         <Stack.Screen
           name="ProfileMoreOptions"
           component={ProfileMoreOptions}

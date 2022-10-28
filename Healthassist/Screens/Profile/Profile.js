@@ -1,5 +1,5 @@
-import { View, Text, ScrollView } from "react-native";
-import React from "react";
+import { View, Text, ScrollView, ActivityIndicator } from "react-native";
+import React, { useEffect } from "react";
 import ProfileSection from "../../Components/ProfileSection/ProfileSection";
 import { Icon } from "@rneui/themed";
 import Button from "../../Components/Button/Button";
@@ -11,6 +11,8 @@ import SingleAction from "../../Components/SingleCallToAction/SingleAction";
 import { useState } from "react";
 import * as SecureStore from "expo-secure-store";
 import { useNavigation } from "@react-navigation/native"
+import { getUserInfo } from "../../functions/userInfo";
+import { useIsFocused } from "@react-navigation/native";
 
 const ProfileActionData = [
   {
@@ -40,8 +42,15 @@ const ProfileActionData = [
 ];
 
 const ProfileScreen = () => {
-
   const [actionData, setActionData] = useState(ProfileActionData);
+  const [userInfo, setUserInfo] = useState();
+
+  const isFocused = useIsFocused()
+
+  useEffect(() => {
+    getUserInfo(setUserInfo)
+  },[isFocused])
+
   const navigation = useNavigation();
   const logout = async () => {
     await SecureStore.deleteItemAsync("authToken")
@@ -67,7 +76,7 @@ const ProfileScreen = () => {
         }}
       >
         <Text style={{ fontSize: 20, fontWeight: "600", marginBottom: 10 }}>
-          Rahul Nikam
+        {userInfo ? userInfo.userName : <ActivityIndicator size={"small"} color="#0CBC8B" />}
         </Text>
         <View
           style={{
@@ -124,7 +133,7 @@ const ProfileScreen = () => {
             color: "black",
           }}
         >
-          Hey, Rahul Nikam
+          Hey, {userInfo ? userInfo.userName.split(" ")[0] : <ActivityIndicator size={"small"} color="#0CBC8B" />}
         </Text>
         <Text style={{ fontSize: 13, color: "rgba(51, 51, 51, 0.7);" }}>
           What do you want to to today?

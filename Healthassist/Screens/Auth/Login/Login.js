@@ -46,6 +46,7 @@ const LoginScreen = ({ navigation }) => {
         console.log("Processing OPT sending function")
         if (res.status == 200) {
           setShowLoader(false);
+          setToken(res.data.userToken)
           navigation.navigate("BottomTab", {
             userData: dataToTransferToNextScreen,
           });
@@ -57,6 +58,9 @@ const LoginScreen = ({ navigation }) => {
       });
   };
 
+  const setToken = async (token) => {
+    await SecureStore.setItemAsync("authToken", token);
+  };
   // useEffect(() => {
   //   if (isFocused) {
   //     getToken();

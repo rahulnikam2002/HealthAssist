@@ -27,8 +27,6 @@ const imagesArray = [
 
 const OnBoarding = ({ navigation, route }) => {
   const isFocused = useIsFocused();
-  
-
   const tokenValidate = useCallback(() => {
     if (isFocused) {
       SecureStore.getItemAsync("authToken")

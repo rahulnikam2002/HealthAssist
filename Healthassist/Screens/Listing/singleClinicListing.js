@@ -171,7 +171,7 @@ const SingleClinicListing = ({ route }) => {
               marginTop: 5,
             }}
           >
-            Just and starting charges, amount can be greater than of which shown
+            Starting charges, amount can be greater than of which shown
             here.
           </Text>
         </View>
